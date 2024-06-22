@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: win2022-vm-nodeport
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+  - name: nodeport
+    nodePort: 30000
+    port: 27017
+    protocol: TCP
+    targetPort: 3389
+  selector:
+    kubevirt.io/domain: win2022-vm
+  type: NodePort

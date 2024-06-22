@@ -1,0 +1,76 @@
+version: '3'
+
+tasks:
+  # KIND CLUSTER
+  create-and-config-kind-cluster:
+    - task: create-kind-cluster
+    - task: install-crds-kind-cluster
+
+  create-kind-cluster:
+    cmds:
+      - kind create cluster --name kubevirt --config=kind_config.yml
+
+  install-crds-kind-cluster:
+    cmds:
+      - kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.59.0/cdi-operator.yaml
+      - kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/v1.59.0/cdi-cr.yaml
+      - kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v1.2.2/kubevirt-operator.yaml
+      - kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/v1.2.2/kubevirt-cr.yaml
+  
+  delete-kind-cluster:
+    cmds:
+      - kind delete cluster --name kubevirt
+  
+  get-kind-cluster-config:
+    cmds:  
+      - kubectl cluster-info --context kind-kubevirt
+
+  nodeips-kind-cluster:
+    cmds:  
+      - kubectl get nodes -o wide
+
+  # KUBEVIRT
+  build-and-run-vm:
+    - task: build-image-vm
+    - task: create-vm
+
+  build-image-vm:
+    cmds:
+      - powershell -command 'if (Test-Path 'output-windows') { Remove-Item -Path 'output-windows' -Recurse -Force }'
+      - powershell -command 'if (Test-Path "$env:USERPROFILE\VirtualBox VMs\win2022") { Remove-Item -Path "$env:USERPROFILE\VirtualBox VMs\win2022" -Recurse -Force }'
+      - packer build ./windows.pkr.hcl
+      - qemu-img convert -f vmdk -O qcow2  ./output-windows/win2022-disk001.vmdk D:/QCOW/windows-2022.qcow2
+
+  create-vm:
+    cmds:
+      - kubectl apply  -f kubevirt_win2022_pvc.yml
+      - kubectl apply  -f kubevirt_win2022_dv.yml
+      - kubectl apply  -f kubevirt_win2022_vm.yml
+      - kubectl apply  -f kubevirt_win2022_svc.yml
+
+  create-vm-svc:
+    cmds:
+      - kubectl apply  -f kubevirt_win2022_svc.yml
+  
+  status-vm:
+    cmds:
+      - kubectl describe vm win2022-vm
+
+  vnc-vm:
+    cmds:
+      - virtctl vnc win2022-vm
+
+  stop-vm:
+    cmds:
+      - virtctl stop win2022-vm
+
+  start-vm:
+    cmds:
+      - virtctl start win2022-vm
+
+  delete-vm:
+    cmds:
+      - kubectl delete  -f kubevirt_win2022_pvc.yml
+      - kubectl delete  -f kubevirt_win2022_dv.yml
+      - kubectl delete  -f kubevirt_win2022_svc.yml
+      - kubectl delete  -f kubevirt_win2022_vm.yml

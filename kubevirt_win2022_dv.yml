@@ -1,0 +1,17 @@
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: "kubevirt-win2022"
+  labels:
+    # insert any desired labels to identify your claim
+    app: win2022
+spec:
+  storage:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 52Gi
+  source:
+    http:
+      url: "http://192.168.1.108:8080/windows-2022.qcow2"

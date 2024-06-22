@@ -1,0 +1,37 @@
+# https://github.com/kubevirt/kubevirt/blob/22f67f5cb5f1142b05641ea2a7b05642ecc9c168/examples/vm-windows-clarge-windows.yaml#L4
+
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  creationTimestamp: 2018-07-04T15:03:08Z
+  generation: 1
+  labels:
+    kubevirt.io/os: windows
+  name: win2022-vm
+spec:
+  running: true
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: win2022-vm
+    spec:
+      domain:
+        cpu:
+          cores: 2
+        firmware:
+          uuid: 5d307ca9-b3ef-428c-8861-06e72d69f223
+        devices:
+          disks:
+          - disk:
+              bus: sata
+            name: disk0
+        machine:
+          type: q35
+        resources:
+          requests:
+            memory: 4096M
+      volumes:
+      - name: disk0
+        persistentVolumeClaim:
+          claimName: kubevirt-win2022
