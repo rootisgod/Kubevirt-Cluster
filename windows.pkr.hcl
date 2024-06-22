@@ -16,7 +16,7 @@ source "virtualbox-iso" "windows" {
   communicator         = "winrm"
   floppy_files         = ["files/Autounattend.xml", "scripts/enable-winrm.ps1", "scripts/sysprep_and_shutdown.bat", "scripts/shutdown.bat"]
   guest_additions_mode = "attach"
-  guest_os_type        = "Windows2016_64"
+  guest_os_type        = "Windows2022_64"
   headless             = "false"
   iso_checksum         = "sha256:3e4fa6d8507b554856fc9ca6079cc402df11a8b79344871669f0251535255325"
   iso_url              = "d:/ISOs/windows_server_2022.iso"
@@ -31,7 +31,6 @@ source "virtualbox-iso" "windows" {
   shutdown_command     = "a:/shutdown.bat"
 }
 
-
 build {
   sources = ["source.virtualbox-iso.windows"]
 
@@ -41,11 +40,7 @@ build {
     script            = "scripts/customise.ps1"
   }
 
-  provisioner "powershell" {
-    elevated_password = "vagrant"
-    elevated_user     = "vagrant"
-    script            = "scripts/windows-updates.ps1"
-  }
+  # Add other script you want to run here, like Windows Updates, software installs etc...
 
   provisioner "windows-restart" {
     restart_timeout = "15m"
